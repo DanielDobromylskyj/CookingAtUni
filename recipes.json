@@ -1,0 +1,14 @@
+{
+  "Template Recipe": {
+      "Servings": 0,
+      "TimeToCookInMins": 0,
+      "Ingredients": [
+        {
+          "Name": "",
+          "Quantity": 0
+        }
+      ],
+      "Description": "",
+      "HowToMake": ""
+  }
+}
