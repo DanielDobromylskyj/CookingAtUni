@@ -1,10 +1,15 @@
 import threading
 import random
 import time
+import json
+import recipes
+import stock
 
 
 class Loader:
-    def __init__(self):
+    def __init__(self, paths: dict):
+        self.paths = paths
+
         self.silly_quotes = [
             "Walking The Fish...",
             "Finding Fire Extinguisher...",
@@ -52,6 +57,26 @@ class Loader:
 
     def load_recipies(self):
         self.loading = "Loading Recipies..."
+        self.current_loading = 0
+        self.max_loading = 0
+
+        recipes_manager = recipes.Recipes(self.paths["recipes"], self.paths["stock"])
+
+        self.max_loading = len(recipes_manager.recipes)
+
+        needed_attrs = [("Servings", int), ("TimeToCookInMins", int), ("Ingredients", list), ("Description", str), ("HowToMake", str), ("isGlutenFree", bool)]
+        for name in recipes_manager.recipes:
+            recipe = recipes_manager.recipes[name]
+            for attr in needed_attrs:
+                if attr[0] in recipe and type(recipe[attr[0]]) is attr[1]:
+                    pass  # good value
+                else:
+                    print(f"[WARNING] Validation Failed On Recipe '{name}'")
+
+            self.current_loading += 1
+
+
+
 
     def set_silly_quote_time(self):
         self.loading = random.choice(self.silly_quotes)
