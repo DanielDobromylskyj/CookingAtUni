@@ -96,7 +96,7 @@ class RecipeSelector(Screen):
         self.main_layout = BoxLayout(orientation='vertical')
 
         # Title / Top Bar
-        top_bar = ColoredBox(size_hint_y=0.1, padding=5, spacing=10)
+        top_bar = ColoredBox(height=40, size_hint_y=None, padding=5, spacing=10)
         title = Label(
             text="[b][size=24]UniCooking[/size][/b]",
             markup=True,
@@ -106,8 +106,8 @@ class RecipeSelector(Screen):
         title.bind(size=title.setter('text_size'))
         top_bar.add_widget(title)
 
-        top_bar.add_widget(Button(text="Stock", size_hint_x=0.3))
-        top_bar.add_widget(Button(text="Config", size_hint_x=0.3))
+        top_bar.add_widget(Button(text="Stock", size_hint_x=0.3, size_hint_y=None, height=30))
+        top_bar.add_widget(Button(text="Config", size_hint_x=0.3, size_hint_y=None, height=30))
         self.main_layout.add_widget(top_bar)
 
         # Spacer
