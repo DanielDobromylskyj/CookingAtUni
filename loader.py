@@ -1,9 +1,10 @@
 import threading
 import random
 import time
-import json
+import os
 import recipes
 import stock
+import requests
 
 
 class Loader:
@@ -54,6 +55,24 @@ class Loader:
         while self.waiting:
             time.sleep(0.2)
 
+    @staticmethod
+    def get_file(url, local_name):
+        response = requests.get(url)
+        response.raise_for_status()  # will raise error if download failed
+
+        with open(local_name, 'wb') as f:
+            f.write(response.content)
+
+
+    def path_check(self):
+        if not os.path.exists(self.paths["recipes"]):
+            self.loading = "Downloading recipies..."
+
+            self.get_file(
+                "https://raw.githubusercontent.com/DanielDobromylskyj/CookingAtUni/refs/heads/master/recipes.json?token=GHSAT0AAAAAADFIA6UJIGOINWUZ6AYRTCXU2CEHPSA",
+                self.paths["recipes"]
+            )
+
 
     def load_recipies(self):
         self.loading = "Loading Recipies..."
@@ -86,6 +105,8 @@ class Loader:
         time.sleep(1)
 
     def __load(self):
+        self.wait()
+        self.path_check()
         self.wait()
         self.load_recipies()
         self.wait()
