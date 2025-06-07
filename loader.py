@@ -5,6 +5,7 @@ import os
 import recipes
 import stock
 import requests
+import traceback
 
 from kivy.app import App
 
@@ -111,15 +112,21 @@ class Loader:
         time.sleep(1)
 
     def __load(self):
-        self.wait()
-        self.path_check()
-        self.wait()
-        self.load_recipies()
-        self.wait()
-        self.set_silly_quote_time()
-        self.wait()
+        try:
+            self.wait()
+            self.path_check()
+            self.wait()
+            self.load_recipies()
+            self.wait()
+            self.set_silly_quote_time()
+            self.wait()
+            self.has_loaded = True
+        except Exception as e:
+            self.loading = f"Failed to load\n{traceback.format_exc()}"
+            self.max_loading = 0
+            self.current_loading = 0
 
-        self.has_loaded = True
+            raise
 
 
     def load(self):
