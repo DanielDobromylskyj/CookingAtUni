@@ -111,7 +111,7 @@ class RecipeSelector(Screen):
         self.main_layout = BoxLayout(orientation='vertical')
 
         # Title / Top Bar
-        top_bar = ColoredBox(height=40, size_hint_y=None, padding=5, spacing=10)
+        top_bar = ColoredBox(size_hint_y=0.02, padding=5, spacing=10)
         title = Label(
             text="[b][size=24]UniCooking[/size][/b]",
             markup=True,
@@ -121,15 +121,15 @@ class RecipeSelector(Screen):
         title.bind(size=title.setter('text_size'))
         top_bar.add_widget(title)
 
-        top_bar.add_widget(Button(text="Stock", size_hint_x=0.3, size_hint_y=None, height=30))
-        top_bar.add_widget(Button(text="Config", size_hint_x=0.3, size_hint_y=None, height=30))
+        top_bar.add_widget(Button(text="Stock", size_hint_x=0.3, size_hint_y=0.8))
+        top_bar.add_widget(Button(text="Config", size_hint_x=0.3, size_hint_y=0.8))
         self.main_layout.add_widget(top_bar)
 
         # Spacer
         self.main_layout.add_widget(ColoredBox(background_color=[0.05, 0.05, 0.05, 1], size_hint_y=0.001))
 
         # Search Area
-        search_bar = ColoredBox(height=40, size_hint_y=None, padding=5, spacing=10)
+        search_bar = ColoredBox(size_hint_y=0.02, padding=5, spacing=10)
         search_input = TextInput(
             hint_text="Search...",
             size_hint_y=1,
