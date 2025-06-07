@@ -17,6 +17,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ListProperty
 
 Window.clearcolor = (0.15, 0.15, 0.15, 1)
+Window.title = "UniCooking"
 
 import loader
 
@@ -70,6 +71,7 @@ class RoundedBox(BoxLayout):
         self.rect.size = self.size
 
 DataLoader = loader.Loader({"stock": "ingredients.db", "recipes": "recipes.json"})
+
 class LoadingScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -168,9 +170,12 @@ class RecipeSelector(Screen):
 
 
 class MyApp(App):
+    name = "UniCooking"
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.title = "UniCooking"
+
+        DataLoader.set_local_path(self)
 
     def build(self):
         sm = ScreenManager()

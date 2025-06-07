@@ -6,10 +6,13 @@ import recipes
 import stock
 import requests
 
+from kivy.app import App
+
 
 class Loader:
     def __init__(self, paths: dict):
         self.paths = paths
+        self.path = ""
 
         self.silly_quotes = [
             "Walking The Fish...",
@@ -35,6 +38,9 @@ class Loader:
         self.max_loading = 0
 
         self.recipies = []
+
+    def set_local_path(self, app):
+        self.path = app.user_data_dir
 
     def get_loaded_data(self):
         return self.recipies
@@ -65,12 +71,12 @@ class Loader:
 
 
     def path_check(self):
-        if not os.path.exists(self.paths["recipes"]):
+        if not os.path.exists(os.path.join(self.path, self.paths["recipes"])):
             self.loading = "Downloading recipies..."
 
             self.get_file(
-                "https://raw.githubusercontent.com/DanielDobromylskyj/CookingAtUni/refs/heads/master/recipes.json?token=GHSAT0AAAAAADFIA6UJIGOINWUZ6AYRTCXU2CEHPSA",
-                self.paths["recipes"]
+                "https://raw.githubusercontent.com/DanielDobromylskyj/CookingAtUni/refs/heads/master/recipes.json",
+                os.path.join(self.path, self.paths["recipes"])
             )
 
 
@@ -79,7 +85,7 @@ class Loader:
         self.current_loading = 0
         self.max_loading = 0
 
-        recipes_manager = recipes.Recipes(self.paths["recipes"], self.paths["stock"])
+        recipes_manager = recipes.Recipes(os.path.join(self.path, self.paths["recipes"]), os.path.join(self.path, self.paths["stock"]))
 
         self.max_loading = len(recipes_manager.recipes)
 
