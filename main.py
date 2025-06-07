@@ -15,6 +15,19 @@ from kivy.graphics import Color, RoundedRectangle, Rectangle
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ListProperty
+import sys
+
+if sys.platform == "android":
+    from android.permissions import request_permissions, Permission
+
+    def callback(permissions, grants):
+        if all(grants):
+            print("Permissions granted")
+        else:
+            print("Permissions denied")
+
+    request_permissions([Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE], callback)
+
 
 Window.clearcolor = (0.15, 0.15, 0.15, 1)
 Window.title = "UniCooking"
