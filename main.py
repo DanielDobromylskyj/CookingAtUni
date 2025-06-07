@@ -1,7 +1,3 @@
-from kivy.config import Config
-Config.set('graphics', 'width', '360')
-Config.set('graphics', 'height', '802')
-
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.scrollview import ScrollView
@@ -15,7 +11,7 @@ from kivy.graphics import Color, RoundedRectangle, Rectangle
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ListProperty
-import sys
+import sys, platform
 
 if sys.platform == "android":
     from android.permissions import request_permissions, Permission
@@ -28,6 +24,9 @@ if sys.platform == "android":
 
     request_permissions([Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE], callback)
 
+if platform.system() == "Windows":
+    # Scale down for desktop
+    Window.size = (540, 1204)
 
 Window.clearcolor = (0.15, 0.15, 0.15, 1)
 Window.title = "UniCooking"
@@ -55,6 +54,19 @@ class ColoredBox(BoxLayout):
 
     def _update_color(self, *args):
         self.bg_color.rgba = self.background_color
+
+class AutoFitLabel(Label):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.bind(size=self._resize_font)
+        Clock.schedule_once(lambda dt: self._resize_font())  # initial sizing
+
+    def _resize_font(self, *args):
+        # Just estimate a good font size based on height or width
+        self.text_size = self.size  # important to allow wrapping
+        if self.width == 0 or self.height == 0:
+            return
+        self.font_size = min(self.height * 0.8, self.width / len(self.text) * 1.8)
 
 class RoundedButton(Button):
     def __init__(self, **kwargs):
@@ -112,13 +124,14 @@ class RecipeSelector(Screen):
 
         # Title / Top Bar
         top_bar = ColoredBox(size_hint_y=0.02, padding=5, spacing=10)
-        title = Label(
-            text="[b][size=24]UniCooking[/size][/b]",
+        title = AutoFitLabel(
+            text="[b]UniCooking[/b]",
             markup=True,
             halign="center",
             valign="middle"
         )
         title.bind(size=title.setter('text_size'))
+
         top_bar.add_widget(title)
 
         top_bar.add_widget(Button(text="Stock", size_hint_x=0.3, size_hint_y=0.8))
@@ -138,12 +151,13 @@ class RecipeSelector(Screen):
             foreground_color=(1, 1, 1, 1),
             cursor_color=(1, 1, 1, 1)
         )
+        search_input.bind(text=self.on_text)
         search_bar.add_widget(search_input)
         self.main_layout.add_widget(search_bar)
 
-        filter_bar = ColoredBox(height=30, orientation='horizontal', size_hint_y=None, padding=(0, 5), spacing=10)
+        filter_bar = ColoredBox(orientation='horizontal', size_hint_y=0.02, padding=(0, 5), spacing=10)
 
-        checkbox = CheckBox(size_hint_x=None, width=30, active=True)
+        self.gluten_free_checkbox = CheckBox(size_hint_x=None, width=30, active=True)
         label = Label(
             text="Gluten Free",
             halign='left',
@@ -152,8 +166,9 @@ class RecipeSelector(Screen):
             width=150  # You can adjust this to fit your text
         )
         label.bind(size=label.setter('text_size'))
+        self.gluten_free_checkbox.bind(on_press=self.populate_results)
 
-        filter_bar.add_widget(checkbox)
+        filter_bar.add_widget(self.gluten_free_checkbox)
         filter_bar.add_widget(label)
 
         self.main_layout.add_widget(filter_bar)
@@ -167,19 +182,42 @@ class RecipeSelector(Screen):
         self.scroll.add_widget(self.results_grid)
         self.results_container.add_widget(self.scroll)
         self.main_layout.add_widget(self.results_container)
-
-        # Example: populate with dummy data
-        self.populate_results(["Apple Pie", "Banana Bread", "Chocolate Cake"])
-
-    def populate_results(self, items):
-        self.results_grid.clear_widgets()
-        for item in items:
-            btn = RoundedButton(text=item, size_hint_y=None, height=40)
-            # You can bind on_press here to handle clicks
-            self.results_grid.add_widget(btn)
-
-        # Add the full layout to the screen
         self.add_widget(self.main_layout)
+
+        self.text_search = ""
+
+
+    def on_text(self, instance, value):
+        self.text_search = value
+        self.populate_results()
+
+    def on_enter(self):
+        self.populate_results()
+
+    @staticmethod
+    def should_be_in_search(query, name):
+        for word in query.split():
+            if word.lower() in name.lower():
+                return True
+
+        return False
+
+
+    def populate_results(self, *args, **kwargs):
+        items = DataLoader.get_loaded_data()
+
+        names = [
+            name for name, data in items.items()
+            if (self.should_be_in_search(self.text_search, name) or not self.text_search) and
+               data["isGlutenFree"] == self.gluten_free_checkbox.active
+        ]
+
+        self.results_grid.clear_widgets()
+
+        for item in names:
+            btn = RoundedButton(text=item, size_hint_y=None, height=80)
+
+            self.results_grid.add_widget(btn)
 
 
 class MyApp(App):

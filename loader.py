@@ -38,7 +38,7 @@ class Loader:
         self.current_loading = 0
         self.max_loading = 0
 
-        self.recipies = []
+        self.recipies = {}
 
     def set_local_path(self, app):
         self.path = app.user_data_dir
@@ -100,8 +100,8 @@ class Loader:
                     print(f"[WARNING] Validation Failed On Recipe '{name}'")
 
             self.current_loading += 1
-
-
+        print(recipes_manager.recipes)
+        self.recipies = recipes_manager.recipes
 
 
     def set_silly_quote_time(self):
