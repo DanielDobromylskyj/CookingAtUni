@@ -13,6 +13,10 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ListProperty
 import sys, platform
 
+# todo - Make it download the recipies from github is there is a change and has internet
+# todo - Move the "Gluten Free" label away from the tickbox, too close on phone
+
+
 if sys.platform == "android":
     from android.permissions import request_permissions, Permission
 

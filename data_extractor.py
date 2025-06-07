@@ -127,10 +127,12 @@ def capture_all_recipes(areas):
 
 
 if __name__ == "__main__":
+    import json
     recipie_areas = [(13, 14), (16, 19), (21, 24), 26, (28, 29), (31, 34), (36, 38), (40, 41), (43, 45), (47, 49), (51, 53), (55, 57), (59, 61), (63, 65), (67, 69), (71, 74), (76, 78), (80, 83), (85, 88), (90, 94), (96, 98), (100, 102), (104, 107), (109, 113), (116, 120), (122, 125), (127, 131), (133, 135), (137, 141), (143, 147), (149, 153), (158, 161), (163, 166), (168, 173), (176, 179)]  # not complete
 
     recipies = capture_all_recipes(recipie_areas)
-    print(len(recipies), [x["title"] for x in recipies])
+    
+    json.dump(recipies, fp=open("data/dump.json", "w"))
 
 
     # todo - Make chatgpt clean up the ingredients list
