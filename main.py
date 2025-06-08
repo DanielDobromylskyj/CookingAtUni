@@ -121,6 +121,48 @@ class LoadingScreen(Screen):
             return False  # stop the Clock
 
 
+class ViewRecipe(Screen):
+    def __init__(self, *args, **kwargs):
+        super().__init__(**kwargs)
+        self.title, self.recipe = args
+
+        self.main_layout = BoxLayout(orientation='vertical')
+
+        top_bar = ColoredBox(size_hint_y=0.02, padding=5, spacing=10)
+        title = AutoFitLabel(
+            text=f"[b]{self.title}[/b]",
+            markup=True,
+            halign="center",
+            valign="middle"
+        )
+        title.bind(size=title.setter('text_size'))
+
+        top_bar.add_widget(title)
+
+        return_button = Button(text="Back", size_hint_x=0.3, size_hint_y=0.8)
+        return_button.bind(on_press=self.go_back)
+        top_bar.add_widget(return_button)
+        self.main_layout.add_widget(top_bar)
+
+        self.results_container = BoxLayout(size_hint_y=0.3, orientation='vertical')
+
+        self.scroll = ScrollView()
+        self.results_grid = GridLayout(cols=1, spacing=5, size_hint_y=None)
+        self.results_grid.bind(minimum_height=self.results_grid.setter('height'))
+
+        self.scroll.add_widget(self.results_grid)
+        self.results_container.add_widget(self.scroll)
+        self.main_layout.add_widget(self.results_container)
+
+        self.add_widget(self.main_layout)
+
+    def go_back(self, instance):
+        sm = App.get_running_app().root
+        sm.current = 'recipie_selector'
+        sm.remove_widget(sm.get_screen(self.name))
+
+
+
 class RecipeSelector(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -167,7 +209,8 @@ class RecipeSelector(Screen):
             halign='left',
             valign='middle',
             size_hint_x=None,
-            width=150  # You can adjust this to fit your text
+            width=150,
+            padding=5
         )
         label.bind(size=label.setter('text_size'))
         self.gluten_free_checkbox.bind(on_press=self.populate_results)
@@ -207,6 +250,16 @@ class RecipeSelector(Screen):
         return False
 
 
+    def load_recipe(self, instance):
+        name = instance.text
+        recipe = DataLoader.get_loaded_data()[name]
+
+        sm = App.get_running_app().root
+        menu = ViewRecipe(name, recipe, name='recipe')
+
+        sm.add_widget(menu)
+        sm.current = 'recipe'
+
     def populate_results(self, *args, **kwargs):
         items = DataLoader.get_loaded_data()
 
@@ -220,6 +273,7 @@ class RecipeSelector(Screen):
 
         for item in names:
             btn = RoundedButton(text=item, size_hint_y=None, height=80)
+            btn.bind(on_press=self.load_recipe)
 
             self.results_grid.add_widget(btn)
 
@@ -229,6 +283,7 @@ class MyApp(App):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.title = "UniCooking"
+        self.sm = None
 
         DataLoader.set_local_path(self)
 
@@ -237,6 +292,7 @@ class MyApp(App):
         sm.add_widget(LoadingScreen(name='loading'))
         sm.add_widget(RecipeSelector(name='recipie_selector'))
         sm.current = 'loading'  # start here
+        self.sm = sm
         return sm
 
 if __name__ == '__main__':

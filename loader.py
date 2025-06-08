@@ -7,7 +7,12 @@ import stock
 import requests
 import traceback
 
-from kivy.app import App
+def has_internet():
+    try:
+        requests.get("https://www.google.com", timeout=3)
+        return True
+    except requests.RequestException:
+        return False
 
 
 class Loader:
@@ -72,8 +77,8 @@ class Loader:
 
 
     def path_check(self):
-        if not os.path.exists(os.path.join(self.path, self.paths["recipes"])):
-            self.loading = "Downloading recipies..."
+        if has_internet():
+            self.loading = "Updating recipies..."
 
             self.get_file(
                 "https://raw.githubusercontent.com/DanielDobromylskyj/CookingAtUni/refs/heads/master/recipes.json",
@@ -100,7 +105,7 @@ class Loader:
                     print(f"[WARNING] Validation Failed On Recipe '{name}'")
 
             self.current_loading += 1
-        print(recipes_manager.recipes)
+
         self.recipies = recipes_manager.recipes
 
 
