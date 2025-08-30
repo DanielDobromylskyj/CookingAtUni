@@ -120,7 +120,6 @@ class LoadingScreen(Screen):
             self.manager.current = 'recipie_selector'
             return False  # stop the Clock
 
-
 class ViewRecipe(Screen):
     def __init__(self, *args, **kwargs):
         super().__init__(**kwargs)
@@ -128,7 +127,8 @@ class ViewRecipe(Screen):
 
         self.main_layout = BoxLayout(orientation='vertical')
 
-        top_bar = ColoredBox(size_hint_y=0.02, padding=5, spacing=10)
+        # --- Top Bar ---
+        top_bar = ColoredBox(size_hint_y=0.1, padding=5, spacing=10)
         title = AutoFitLabel(
             text=f"[b]{self.title}[/b]",
             markup=True,
@@ -136,7 +136,6 @@ class ViewRecipe(Screen):
             valign="middle"
         )
         title.bind(size=title.setter('text_size'))
-
         top_bar.add_widget(title)
 
         return_button = Button(text="Back", size_hint_x=0.3, size_hint_y=0.8)
@@ -144,23 +143,76 @@ class ViewRecipe(Screen):
         top_bar.add_widget(return_button)
         self.main_layout.add_widget(top_bar)
 
-        self.results_container = BoxLayout(size_hint_y=0.3, orientation='vertical')
-
+        # --- Scrollable content ---
         self.scroll = ScrollView()
-        self.results_grid = GridLayout(cols=1, spacing=5, size_hint_y=None)
+        self.results_grid = GridLayout(cols=1, spacing=15, padding=15, size_hint_y=None)
         self.results_grid.bind(minimum_height=self.results_grid.setter('height'))
 
-        self.scroll.add_widget(self.results_grid)
-        self.results_container.add_widget(self.scroll)
-        self.main_layout.add_widget(self.results_container)
+        # --- Description Section ---
+        desc_box = ColoredBox(orientation="vertical", padding=10, size_hint_y=None, height=150)
+        desc_box.add_widget(Label(text="[b]Description[/b]", markup=True, size_hint_y=None, height=30))
 
+        print(self.recipe, str(self.recipe["Description"]))
+
+        desc_label = Label(
+            text=str(self.recipe["Description"]),
+            text_size=(Window.width - 40, None),
+            halign="left", valign="top",
+            size_hint_y=None
+        )
+        desc_label.bind(texture_size=desc_label.setter("size"))
+        desc_box.add_widget(desc_label)
+        self.results_grid.add_widget(desc_box)
+
+        # --- Info Section (Servings + Time side by side) ---
+        info_box = ColoredBox(orientation="vertical", padding=10, size_hint_y=None, height=90)
+        info_box.add_widget(Label(text="[b]Information[/b]", markup=True, size_hint_y=None, height=30))
+
+        row = BoxLayout(orientation="horizontal", spacing=20)
+        row.add_widget(Label(text=f"Servings: {self.recipe.get('Servings', '-')}", size_hint_y=None, height=40))
+        row.add_widget(Label(text=f"Time: {self.recipe.get('TimeToCookInMins', '-')} mins", size_hint_y=None, height=40))
+        info_box.add_widget(row)
+
+        self.results_grid.add_widget(info_box)
+
+        # --- Allergies Section ---
+        allergy_box = ColoredBox(orientation="vertical", padding=10, size_hint_y=None, height=100)
+        allergy_box.add_widget(Label(text="[b]Allergies[/b]", markup=True, size_hint_y=None, height=30))
+        allergy_box.add_widget(Label(text=f"Gluten Free: {'Yes' if self.recipe.get('isGlutenFree') else 'No'}", size_hint_y=None, height=40))
+        self.results_grid.add_widget(allergy_box)
+
+        # --- Ingredients Section ---
+        ing_box = ColoredBox(orientation="vertical", padding=10, size_hint_y=None)
+        ing_box.add_widget(Label(text="[b]Ingredients[/b]", markup=True, size_hint_y=None, height=30))
+        for ing in self.recipe.get("Ingredients", []):
+            lbl = Label(text=f"• {ing['Name']} - {ing['Quantity']}", size_hint_y=None, height=30, halign="left")
+            lbl.bind(texture_size=lbl.setter("size"))
+            ing_box.add_widget(lbl)
+        self.results_grid.add_widget(ing_box)
+
+        # --- How to Make Section ---
+        how_box = ColoredBox(orientation="vertical", padding=10, size_hint_y=None)
+        how_box.add_widget(Label(text="[b]How to Make[/b]", markup=True, size_hint_y=None, height=30))
+
+        how_label = Label(
+            text=self.recipe.get("HowToMake", ""),
+            text_size=(Window.width - 40, None),
+            halign="left", valign="top",
+            size_hint_y=None
+        )
+        how_label.bind(texture_size=how_label.setter("size"))
+        how_box.add_widget(how_label)
+        self.results_grid.add_widget(how_box)
+
+        # --- Attach to Scroll ---
+        self.scroll.add_widget(self.results_grid)
+        self.main_layout.add_widget(self.scroll)
         self.add_widget(self.main_layout)
 
     def go_back(self, instance):
         sm = App.get_running_app().root
-        sm.current = 'recipie_selector'
+        sm.current = "recipie_selector"
         sm.remove_widget(sm.get_screen(self.name))
-
 
 
 class RecipeSelector(Screen):
